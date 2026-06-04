@@ -13,6 +13,21 @@ palette <- palette_CB
 fungi_data <- read.csv("data/data_fungi.csv") %>%  select(-X)
 
 
+fungi_data %>% 
+  pivot_longer(
+    cols = c(-marker, -date, -date_label_noyear, -year, -sampling, -plot, -treatment), 
+    names_to = "variable", 
+    values_to = "values"
+  ) %>% 
+  ggplot(aes(y = values, x = "")) + 
+  facet_wrap(~ variable, scale = "free") + 
+  geom_boxplot()
+
+# There are outliers. However, each dot represent a replicate. For dynamic analysis
+# we cannot lose points because we only have 4. 
+
+
+
 {variables_fungi <- 
   (fungi_data %>% 
      select(-plot , -marker, -treatment, -date, -date_label_noyear, -year, -sampling, -goods_coverage) %>% 

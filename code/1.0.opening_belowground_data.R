@@ -77,7 +77,7 @@ info_prokariota <- info_micro %>%
 
 
   prokariota_raw1 <- read.delim(
-  "data/16S_1st_batch_relative_abundance/featureTable.sample.total.relative.xls",
+  "data/NOVOGENE/16S_1st_batch_relative_abundance/featureTable.sample.total.relative.xls",
   header = TRUE,
   sep = "\t",
   check.names = FALSE
@@ -88,7 +88,7 @@ colnames(prokariota_raw1)[1] <- "ASV_num"
 #sum(abundancias > 0)
 
 prokariota_raw2 <- read.delim(
-  "data/16S_2nd_batch_relative_abundance/featureTable.sample.total.relative.xls",
+  "data/NOVOGENE/16S_2nd_batch_relative_abundance/featureTable.sample.total.relative.xls",
   header = TRUE,
   sep = "\t",
   check.names = FALSE
@@ -97,7 +97,7 @@ prokariota_raw2 <- read.delim(
 colnames(prokariota_raw2)[1] <- "ASV_num"
 
 fungi_raw1 <- read.delim(
-  "data/ITS_1st_batch_relative_abundance/featureTable.sample.total.relative.xls",
+  "data/NOVOGENE/ITS_1st_batch_relative_abundance/featureTable.sample.total.relative.xls",
   header = TRUE,
   sep = "\t",
   check.names = FALSE
@@ -106,7 +106,7 @@ fungi_raw1 <- read.delim(
 colnames(fungi_raw1)[1] <- "ASV_num"
 
 fungi_raw2 <- read.delim(
-  "data/ITS_2nd_batch_relative_abundance/featureTable.sample.total.relative.xls",
+  "data/NOVOGENE/ITS_2nd_batch_relative_abundance/featureTable.sample.total.relative.xls",
   header = TRUE,
   sep = "\t",
   check.names = FALSE)
@@ -162,6 +162,10 @@ for(i in seq_along(list_data)){
 
 data_micro_abundance <- do.call(rbind, list_result)
 
+prokariota_ASV_raw <- data_micro_abundance %>% 
+  filter(marker == "16S")
+
+prokariota_ASV_raw %>% write.csv("data/prokariota_ASV_raw.csv")
 
 prokariota_nASV <- data_micro_abundance %>% 
   filter(marker == "16S") %>% 
@@ -173,6 +177,10 @@ prokariota_nASV <- data_micro_abundance %>%
 length(prokariota_nASV$abundance) == sum(prokariota_nASV$abundance)
 
 
+
+fungi_ASV_raw <- data_micro_abundance %>% 
+  filter(marker == "ITS")
+fungi_ASV_raw %>% write.csv("data/fungi_ASV_raw.csv")
 
 fungi_nASV <- data_micro_abundance %>% 
   filter(marker == "ITS") %>% 
@@ -189,8 +197,8 @@ length(fungi_nASV$abundance) == sum(fungi_nASV$abundance)
 # Actually this data contains the number of ASV calculated in the previous data (observed features)
 
 
-dominance_prokariota_1 <- read_tsv("data/16S_1stbatch_dominance.txt")
-dominance_prokariota_2 <- read_tsv("data/16S_2ndbatch_dominance.txt")
+dominance_prokariota_1 <- read_tsv("data/NOVOGENE/16S_1stbatch_dominance.txt")
+dominance_prokariota_2 <- read_tsv("data/NOVOGENE/16S_2ndbatch_dominance.txt")
 
 prokariota_dominance <- bind_rows(dominance_prokariota_1, dominance_prokariota_2) %>%
   as.data.frame() %>% 
@@ -200,8 +208,8 @@ prokariota_dominance <- bind_rows(dominance_prokariota_1, dominance_prokariota_2
 
 
 
-dominance_fungi_1 <- read_tsv("data/ITS_1stbatch_dominance.txt")
-dominance_fungi_2 <- read_tsv("data/ITS_2ndbatch_dominance.txt")
+dominance_fungi_1 <- read_tsv("data/NOVOGENE/ITS_1stbatch_dominance.txt")
+dominance_fungi_2 <- read_tsv("data/NOVOGENE/ITS_2ndbatch_dominance.txt")
 
 fungi_dominance <- bind_rows(dominance_fungi_1, dominance_fungi_2) %>%
   as.data.frame() %>% 
@@ -212,7 +220,7 @@ fungi_dominance <- bind_rows(dominance_fungi_1, dominance_fungi_2) %>%
 dominance_micro <- rbind(prokariota_dominance, fungi_dominance) %>% 
   select(-sample, -label_micro)
 
-#dominance_micro %>%  write.csv("data/data_micro_dominance.csv")
+#dominance_micro %>%  write.csv("data/NOVOGENE/data_micro_dominance.csv")
 
 
 
@@ -222,7 +230,7 @@ dominance_micro <- rbind(prokariota_dominance, fungi_dominance) %>%
 
 
 prokariota_ft_raw1 <- read.delim(
-  "data/16S_1st_batch_relative_funtraits/faprotax.sample.anno.relative.xls",
+  "data/NOVOGENE/16S_1st_batch_relative_funtraits/faprotax.sample.anno.relative.xls",
   header = TRUE,
   sep = "\t",
   check.names = FALSE
@@ -233,7 +241,7 @@ prokariota_ft_raw1 <- read.delim(
 #sum(abundancias > 0)
 
 prokariota_ft_raw2 <- read.delim(
-  "data/16S_2nd_batch_relative_funtraits/faprotax.sample.anno.relative.xls",
+  "data/NOVOGENE/16S_2nd_batch_relative_funtraits/faprotax.sample.anno.relative.xls",
   header = TRUE,
   sep = "\t",
   check.names = FALSE
@@ -243,14 +251,14 @@ prokariota_ft_raw2 <- read.delim(
 # that right?
 
 fungi_ft_raw1 <- read.delim(
-  "data/ITS_1st_batch_relative_funtraits/funguild.sample.mode.relative.xls",
+  "data/NOVOGENE/ITS_1st_batch_relative_funtraits/funguild.sample.mode.relative.xls",
   header = TRUE,
   sep = "\t",
   check.names = FALSE
 )
 
 fungi_ft_raw2 <- read.delim(
-  "data/ITS_2nd_batch_relative_funtraits/funguild.sample.mode.relative.xls",
+  "data/NOVOGENE/ITS_2nd_batch_relative_funtraits/funguild.sample.mode.relative.xls",
   sep = "\t",
   check.names = FALSE)
 
