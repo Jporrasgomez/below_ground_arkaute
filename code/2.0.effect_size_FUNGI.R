@@ -69,6 +69,18 @@ unique(false_sampling$variable)
 nrow(false_sampling)/nrow(geary_test_sampling)
 
 
+testing_false_cases <- false_sampling %>%
+  ungroup() %>% 
+  select(variable, treatment, sampling, geary_test_value, geary_test_outcome) %>% 
+  group_by(variable, treatment) %>% 
+  summarize(
+    n = n(),
+    samplings = list(as.numeric(sampling)),
+    .groups = "drop"
+  )
+
+
+
 {
   
   variables_fungi <- 
