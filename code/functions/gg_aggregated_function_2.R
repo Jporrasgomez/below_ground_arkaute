@@ -47,9 +47,9 @@ ggagg2 <- function(data, palette, labels, colorline, limitvar, labelvar, breaks_
     theme(
       strip.background   = element_blank(),
       strip.placement    = "outside",
-      strip.text         = element_text(face = "bold", size = 12),
+      strip.text         = element_text(face = "bold", size = 10),
       strip.text.y.left  = element_text(face = "bold"),
-      axis.text.y        = element_text(angle = 90, hjust = 0.5, face = "plain", size = 12),
+      axis.text.y        = element_text(angle = 90, hjust = 0.5, face = "plain", size = 9),
       axis.text.x        = element_blank(),
       axis.ticks.x       = element_blank(),
       legend.position    = "bottom",

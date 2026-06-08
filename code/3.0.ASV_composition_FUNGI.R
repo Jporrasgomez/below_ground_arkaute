@@ -128,6 +128,7 @@ i = 1
 # 1: no abundance_mean_sampling transformation
 # 2: Hellinger transformation of abundance_mean_sampling
 
+{
 
 
 sp_wide_sampling <- fungi_ASV_sampling %>%
@@ -200,13 +201,16 @@ ggnmds_alltreatments <-
     #title = "NMDS Bray-Curtis: mean abundance_mean_sampling of species at sampling level",
     subtitle = paste0("Stress = ", round(nmds_bc_sampling$stress, 3)),
     x = "NMDS1", y = "NMDS2", color = " ") +
-  theme1
+  theme_otc +
+  theme(
+    legend.position = "bottom"
+  )
 
 print(ggnmds_alltreatments)
 
+}
 
-
-#ggsave("results/Plots/protofinal/species_composition_sampling_LABELS.png", plot = ggnmds_alltreatments, dpi = 300)
+ggsave("results/plots/composition_FUNGI.png", plot = ggnmds_alltreatments, dpi = 300)
 
 
 

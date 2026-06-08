@@ -175,12 +175,17 @@ dyn <- effsize_dynamics_data %>%
 
 comparissons <- c("p_vs_c", "w_vs_c", "wp_vs_c")
 
+lvls <-"SRL_rate"
+labs <- c("SRL_rate" = "Soil respiration rate")
+
+
 gg_eff_agg_c2 <- agg %>% 
   filter(eff_descriptor %in% comparissons,
          variable == "SRL_rate") %>% 
   mutate(
     eff_descriptor = factor(eff_descriptor, levels = comparissons),
-    variable       = factor(variable)
+    variable       = factor(variable, levels = lvls,
+                            labels = labs)
   ) %>% 
   ggagg2(
     palette   = palette_RR_CB,
@@ -196,7 +201,9 @@ gg_eff_dynamics_c2<- dyn %>%
   filter(eff_descriptor %in% comparissons) %>% 
   filter(variable == "SRL_rate") %>%  
   mutate(
-    variable = factor(variable)) %>% 
+    variable       = factor(variable, levels = lvls,
+                            labels = labs)
+    ) %>% 
   ggdyn2(palette_RR_CB,
          labels_RR2, 
          "grey50",
@@ -225,7 +232,8 @@ gg_eff_agg_wp2 <- agg %>%
   filter(eff_descriptor == "wp_vs_p",
          variable == "SRL_rate") %>% 
   mutate(
-    variable = factor(variable)
+    variable       = factor(variable, levels = lvls,
+                            labels = labs)
   ) %>% 
   ggagg2(
     palette   = palette_RR_wp,
@@ -243,7 +251,9 @@ gg_eff_dynamics_wp2<- dyn %>%
   filter(eff_descriptor %in% c("wp_vs_p")) %>% 
   filter(variable == "SRL_rate") %>%  
   mutate(
-    variable = factor(variable)) %>% 
+    variable = factor(variable, levels = lvls,
+                                       labels = labs)
+    ) %>% 
   
   ggdyn2(palette_RR_wp,
          labels_RR_wp2, 
@@ -268,6 +278,9 @@ gg_wp <-
 gg_control
 gg_wp
 
+
+ggsave("results/plots/soil_respiration_c.png", plot = gg_control, dpi = 300)
+ggsave("results/plots/soil_respiration_wp.png", plot = gg_wp, dpi = 300)
 
 
 

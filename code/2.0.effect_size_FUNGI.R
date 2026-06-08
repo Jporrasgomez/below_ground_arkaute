@@ -27,8 +27,51 @@ fungi_data %>%
 # we cannot lose points because we only have 4. 
 
 
+geary_test_treatment <- fungi_data %>%
+  pivot_longer(
+    cols = c(-marker, -date, -date_label_noyear, -year, -sampling, -plot, -treatment),
+    values_to = "value", 
+    names_to = "variable"
+  ) %>% 
+  filter(sampling != "1") %>% 
+  group_by(treatment, variable) %>% 
+  summarize(
+    n = n(),
+    mean_variable = mean(value, na.rm = T), 
+    sd_variable = sd(value, na.rm = T)
+  ) %>% 
+  mutate(geary_test_value = (mean_variable/sd_variable) *((4 * n^1.5) / (1 + 4 * n))) %>% 
+  mutate(geary_test_outcome = ifelse(geary_test_value >= 3, paste0("TRUE"), paste0("FALSE")))
 
-{variables_fungi <- 
+
+
+
+geary_test_sampling <- fungi_data %>%
+  pivot_longer(
+    cols = c(-marker, -date, -date_label_noyear, -year, -sampling, -plot, -treatment),
+    values_to = "value", 
+    names_to = "variable"
+  ) %>% 
+  group_by(treatment, sampling, variable) %>% 
+  summarize(
+    n = n(),
+    mean_variable = mean(value, na.rm = T), 
+    sd_variable = sd(value, na.rm = T)
+  ) %>% 
+  mutate(geary_test_value = (mean_variable/sd_variable) *((4 * n^1.5) / (1 + 4 * n))) %>% 
+  mutate(geary_test_outcome = ifelse(geary_test_value >= 3, paste0("TRUE"), paste0("FALSE")))
+
+
+false_sampling <- geary_test_sampling %>% 
+  filter(geary_test_outcome == "FALSE")
+unique(false_sampling$variable)
+
+nrow(false_sampling)/nrow(geary_test_sampling)
+
+
+{
+  
+  variables_fungi <- 
   (fungi_data %>% 
      select(-plot , -marker, -treatment, -date, -date_label_noyear, -year, -sampling, -goods_coverage) %>% 
      colnames())
@@ -38,9 +81,24 @@ fungi <- fungi_data
 
 
 limits_main_variables <- variables_fungi
-labels_main_variables <- variables_fungi
-
-
+labels_fungi_variables <- c(
+  "nASV"                              = "Number ASV",
+  "observed_features"                 = "Number ASV novogene",
+  "chao1"                             = "Estimated richness (chao1)",
+  "dominance"                         = "Dominance",
+  "pielou_e"                          = "Evenness",
+  "shannon"                           = "Shannon",
+  "simpson"                           = "Simpson",
+  "Pathogen.Saprotroph.Symbiotroph"   = "Pathog./Sap./Symb.",
+  "Pathotroph"                        = "Pathotroph",
+  "Pathotroph.Saprotroph"             = "Pathotroph/Saprotroph",
+  "Pathotroph.Saprotroph.Symbiotroph" = "Pathotr./Sap./Symb.",
+  "Pathotroph.Symbiotroph"            = "Pathotroph/Symbiotroph",
+  "Saprotroph"                        = "Saprotroph",
+  "Saprotroph.Symbiotroph"            = "Saprotroph/Symbiotroph",
+  "Symbiotroph"                       = "Symbiotroph",
+  "Unassigned"                        = "Unassigned"
+)
 
 source("code/functions/eff_size_LRR_function.R")
 source("code/functions/eff_size_dynamics_LRR_function.R")
@@ -60,11 +118,11 @@ for(i in seq_along(variables_fungi)){
   LRR_agg(list_fungi[[1]], variables_fungi[i])
   
   list_agg[[i]] <- effsize_data %>% 
-    mutate(
-      eff_value = round(eff_value, 2),
-      lower_limit = round(lower_limit, 2),
-      upper_limit = round(upper_limit, 2)
-    ) %>% 
+   # mutate(
+   #   eff_value = round(eff_value, 2),
+   #   lower_limit = round(lower_limit, 2),
+   #   upper_limit = round(upper_limit, 2)
+   # ) %>% 
     select(eff_descriptor, variable, eff_value, lower_limit, upper_limit, null_effect)
   
   
@@ -92,13 +150,13 @@ results_fungi <- list()
 
 
 lvls1 <- limits_main_variables[1:6]
-labs1 <- unname(lvls1)
+labs1 <- unname(labels_fungi_variables[1:6])
 
 lvls2 <- limits_main_variables[7:12]
-labs2 <- unname(lvls2)
+labs2 <- unname(labels_fungi_variables[7:12])
 
 lvls3 <- limits_main_variables[13:16]
-labs3 <- unname(lvls3)
+labs3 <- unname(labels_fungi_variables[13:16])
 
 
 
@@ -125,7 +183,7 @@ for (i in seq_along(1:3)){
       colorline = "grey50",
       limitvar  = lvls,
       labelvar  = labs, 
-      breaks_axix_y = 4
+      breaks_axix_y = 3
     )
   
   
@@ -222,6 +280,19 @@ list_results_c[[3]]
 list_results_wp[[1]]
 list_results_wp[[2]]
 list_results_wp[[3]]
+
+
+
+ggsave("results/plots/fungi_control_1.png", plot = list_results_c[[1]], dpi = 300)
+ggsave("results/plots/fungi_control_2.png", plot = list_results_c[[2]], dpi = 300)
+ggsave("results/plots/fungi_control_3.png", plot = list_results_c[[3]], dpi = 300)
+
+
+ggsave("results/plots/fungi_wp_1.png", plot = list_results_wp[[1]], dpi = 300)
+ggsave("results/plots/fungi_wp_2.png", plot = list_results_wp[[2]], dpi = 300)
+ggsave("results/plots/fungi_wp_3.png", plot = list_results_wp[[3]], dpi = 300)
+
+
 
 
 

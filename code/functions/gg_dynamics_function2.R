@@ -62,7 +62,14 @@ v_year  <- match("Nov 13", levs) + 0.5
     
     labs(y = NULL, x = NULL, color = NULL) +
     
-    gg_RR_theme 
+    gg_RR_theme +
+    theme(
+    axis.text.x       = element_text(
+      angle = 45,
+      hjust = 1,
+      face  = "plain",
+      size  = 12
+    ))
   #+
     #theme(strip.text = element_blank())
   

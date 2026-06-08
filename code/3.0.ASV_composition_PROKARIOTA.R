@@ -131,7 +131,7 @@ i = 1
 # 2: Hellinger transformation of abundance_mean_sampling
 
 
-
+{
   sp_wide_sampling <- prokariota_ASV_sampling %>%
     pivot_wider(id_cols = c(sampling, treatment, id),
                 names_from = ASV_num,
@@ -202,13 +202,14 @@ i = 1
       #title = "NMDS Bray-Curtis: mean abundance_mean_sampling of species at sampling level",
       subtitle = paste0("Stress = ", round(nmds_bc_sampling$stress, 3)),
       x = "NMDS1", y = "NMDS2", color = " ") +
-    theme1
+    theme_otc + 
+    theme(legend.position = "bottom")
   
   print(ggnmds_alltreatments)
   
 
-
-#ggsave("results/Plots/protofinal/species_composition_sampling_LABELS.png", plot = ggnmds_alltreatments, dpi = 300)
+}
+ggsave("results/plots/composition_PROKARIOTA.png", plot = ggnmds_alltreatments, dpi = 300)
 
 
 

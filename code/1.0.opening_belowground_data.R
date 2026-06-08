@@ -123,7 +123,7 @@ for(i in seq_along(list_data)){
   
   list_result[[i]] <- list_data[[i]] %>% 
     pivot_longer(
-      cols = -c(Taxonomy, ASV_num),   # Keep Taxonomy and X.OTU_num unchanged
+      cols = -c(Taxonomy, ASV_num),   # Keep Taxonomy and ASV_num unchanged
       names_to = "sample",              # Name for the new "variable" column
       values_to = "abundance"               # Name for the new "value" column
     )  %>%
@@ -394,8 +394,6 @@ vector_fungi_funtraits <-
          select(-plot ,-sample, -marker, -label_micro, -treatment, -date, -day, -month,
                 -year, -sampling, -date_label, - date_label_noyear) %>% 
          colnames())
-
-
 
 
 

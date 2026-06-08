@@ -13,6 +13,67 @@ palette <- palette_CB
 prokariota_data <- read.csv("data/data_prokariota.csv") %>%  select(-X)
 
 
+
+
+
+# Geary test modification proposed in Lajeunesse 2015. We need to test
+# how suitable the data is for log response ratio analysis and their delta or sigma
+# modifications (also proposed in the same paper).If the test is below 3, data is not suitable
+
+geary_test_treatment <- prokariota_data %>%
+  pivot_longer(
+    cols = c(-marker, -date, -date_label_noyear, -year, -sampling, -plot, -treatment),
+    values_to = "value", 
+    names_to = "variable"
+  ) %>% 
+  filter(sampling != "1") %>% 
+  group_by(treatment, variable) %>% 
+  summarize(
+    n = n(),
+    mean_variable = mean(value, na.rm = T), 
+    sd_variable = sd(value, na.rm = T)
+  ) %>% 
+  mutate(geary_test_value = (mean_variable/sd_variable) *((4 * n^1.5) / (1 + 4 * n))) %>% 
+  mutate(geary_test_outcome = ifelse(geary_test_value >= 3, paste0("TRUE"), paste0("FALSE")))
+
+
+geary_test_sampling <- prokariota_data %>%
+  pivot_longer(
+    cols = c(-marker, -date, -date_label_noyear, -year, -sampling, -plot, -treatment),
+    values_to = "value", 
+    names_to = "variable"
+  ) %>% 
+  group_by(treatment, sampling, variable) %>% 
+  summarize(
+    n = n(),
+    mean_variable = mean(value, na.rm = T), 
+    sd_variable = sd(value, na.rm = T)
+  ) %>% 
+  mutate(geary_test_value = (mean_variable/sd_variable) *((4 * n^1.5) / (1 + 4 * n))) %>% 
+  mutate(geary_test_outcome = ifelse(geary_test_value >= 3, paste0("TRUE"), paste0("FALSE")))
+
+false_sampling <- geary_test_sampling %>% 
+  filter(geary_test_outcome == "FALSE")
+unique(false_sampling$variable)
+
+nrow(false_sampling)/nrow(geary_test_sampling) *100
+
+testing_false_cases <- false_sampling %>%
+  ungroup() %>% 
+  select(variable, treatment, sampling, geary_test_value, geary_test_outcome) %>% 
+  group_by(variable, treatment) %>% 
+  summarize(
+    n = n(),
+    samplings = list(as.numeric(sampling)),
+    .groups = "drop"
+  )
+
+
+
+  
+
+############ EFFECT SIZE #############
+
 prokariota_data %>% 
   pivot_longer(
     cols = c(-marker, -date, -date_label_noyear, -year, -sampling, -plot, -treatment), 
@@ -27,7 +88,8 @@ prokariota_data %>%
 # we cannot lose points because we only have 4. 
 
 
-{variables_prokariota <- 
+{
+  variables_prokariota <- 
   (prokariota_data %>% 
          select(-plot , -marker, -treatment, -date, -date_label_noyear, -year, -sampling, -goods_coverage) %>% 
          colnames())
@@ -37,7 +99,44 @@ prokariota <- prokariota_data
 
 
 limits_main_variables <- variables_prokariota
-labels_main_variables <- variables_prokariota
+labels_main_variables <- c(
+  "nASV"                                          = "Number ASV", 
+  "observed_features"                             = "Number ASV novogene", 
+  "chao1"                                         = "Estimated richness (chao1)",
+  "dominance"                                     = "Dominance", 
+  "pielou_e"                                      = "Evenness", 
+  "shannon"                                       = "Shannon", 
+  "simpson"                                       = "Simpson", 
+  "aerobic_ammonia_oxidation"                     = "Aer. Ammonia Ox.",
+  "aerobic_chemoheterotrophy"                     = "Aer. Chemoheterotrophy", 
+  "aliphatic_non_methane_hydrocarbon_degradation" = "ANMHD", 
+  "animal_parasites_or_symbionts"                 = "Animal parasites/symbionts", 
+  "aromatic_compound_degradation"                 = "Aromatic comp. deg.", 
+  "aromatic_hydrocarbon_degradation"              = "Aromatic HC deg.",
+  "cellulolysis"                                  = "Cellulolysis",
+  "chemoheterotrophy"                             = "Chemoheterotrophy",
+  "chitinolysis"                                  = "Chitinolysis",
+  "denitrification"                               = "Denitrification",
+  "fermentation"                                  = "Fermentation",
+  "human_pathogens_all"                           = "Human Pathogens",
+  "hydrocarbon_degradation"                       = "HC Degradation",
+  "iron_respiration"                              = "Iron Respiration",
+  "nitrate_denitrification"                       = "Nitrate Denitrif.",
+  "nitrate_reduction"                             = "Nitrate Reduction",
+  "nitrate_respiration"                           = "Nitrate Respir.",
+  "nitrification"                                 = "Nitrification",
+  "nitrite_denitrification"                       = "Nitrite Denitrif.",
+  "nitrite_respiration"                           = "Nitrite Respir.",
+  "nitrogen_respiration"                          = "Nitrogen Respir.",
+  "nitrous_oxide_denitrification"                 = "N2O Denitrif.",
+  "Others"                                        = "Others",
+  "predatory_or_exoparasitic"                     = "Predatory/Exoparasitic",
+  "respiration_of_sulfur_compounds"               = "Sulfur Comp. Respir.",
+  "sulfur_respiration"                            = "Sulfur Respir.",
+  "ureolysis"                                     = "Ureolysis",
+  "xylanolysis"                                   = "Xylanolysis"
+)
+
 
 
 
@@ -59,11 +158,11 @@ for(i in seq_along(variables_prokariota)){
     LRR_agg(list_prokariota[[1]], variables_prokariota[i])
     
     list_agg[[i]] <- effsize_data %>% 
-      mutate(
-        eff_value = round(eff_value, 2),
-        lower_limit = round(lower_limit, 2),
-        upper_limit = round(upper_limit, 2)
-      ) %>% 
+      #mutate(
+      #  eff_value = round(eff_value, 2),
+      #  lower_limit = round(lower_limit, 2),
+      #  upper_limit = round(upper_limit, 2)
+      #) %>% 
       select(eff_descriptor, variable, eff_value, lower_limit, upper_limit, null_effect)
     
   
@@ -91,22 +190,22 @@ results_prokariota <- list()
 
 
     lvls1 <- limits_main_variables[1:6]
-    labs1 <- unname(lvls1)
+    labs1 <- unname(labels_main_variables[1:6])
     
     lvls2 <- limits_main_variables[7:12]
-    labs2 <- unname(lvls2)
+    labs2 <- unname(labels_main_variables[7:12])
     
     lvls3 <- limits_main_variables[13:18]
-    labs3 <- unname(lvls3)
+    labs3 <- unname(labels_main_variables[13:18])
     
     lvls4 <- limits_main_variables[19:24]
-    labs4 <- unname(lvls4)
+    labs4 <- unname(labels_main_variables[19:24])
     
     lvls5 <- limits_main_variables[25:30]
-    labs5 <- unname(lvls5)
+    labs5 <- unname(labels_main_variables[25:30])
     
     lvls6 <- limits_main_variables[31:35]
-    labs6 <- unname(lvls6)
+    labs6 <- unname(labels_main_variables[31:35])
     
     
 list_levels <- list(lvls1, lvls2, lvls3, lvls4, lvls5, lvls6)
@@ -132,7 +231,7 @@ list_results_wp <- list()
         colorline = "grey50",
         limitvar  = lvls,
         labelvar  = labs, 
-        breaks_axix_y = 4
+        breaks_axix_y = 3
       )
     
     
@@ -155,7 +254,7 @@ list_results_wp <- list()
       (gg_eff_agg_c2 + 
          gg_eff_dynamics_c2 + theme (legend.position = "none") + 
          plot_layout(guides = "collect",
-                     widths = c(1, 10))) +
+                     widths = c(1, 8))) +
       plot_annotation(theme = theme(legend.position = "bottom"))
     
     list_results_c[[i]] <- gg_control
@@ -209,7 +308,7 @@ list_results_wp <- list()
       (gg_eff_agg_wp2 + 
          gg_eff_dynamics_wp2 + theme (legend.position = "none") + 
          plot_layout(guides = "collect",
-                     widths = c(1, 10))) +
+                     widths = c(1, 8))) +
       plot_annotation(theme = theme(legend.position = "bottom"))
     
     
@@ -238,6 +337,20 @@ list_results_wp[[6]]
 
 
 
+ggsave("results/plots/prokariota_control_1.png", plot = list_results_c[[1]], dpi = 300)
+ggsave("results/plots/prokariota_control_2.png", plot = list_results_c[[2]], dpi = 300)
+ggsave("results/plots/prokariota_control_3.png", plot = list_results_c[[3]], dpi = 300)
+ggsave("results/plots/prokariota_control_4.png", plot = list_results_c[[4]], dpi = 300)
+ggsave("results/plots/prokariota_control_5.png", plot = list_results_c[[5]], dpi = 300)
+ggsave("results/plots/prokariota_control_6.png", plot = list_results_c[[6]], dpi = 300)
+
+
+ggsave("results/plots/prokariota_wp_1.png", plot = list_results_wp[[1]], dpi = 300)
+ggsave("results/plots/prokariota_wp_2.png", plot = list_results_wp[[2]], dpi = 300)
+ggsave("results/plots/prokariota_wp_3.png", plot = list_results_wp[[3]], dpi = 300)
+ggsave("results/plots/prokariota_wp_4.png", plot = list_results_wp[[4]], dpi = 300)
+ggsave("results/plots/prokariota_wp_5.png", plot = list_results_wp[[5]], dpi = 300)
+ggsave("results/plots/prokariota_wp_6.png", plot = list_results_wp[[6]], dpi = 300)
 
 
 
