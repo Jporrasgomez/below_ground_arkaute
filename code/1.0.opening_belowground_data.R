@@ -387,6 +387,7 @@ fungi_funtraits %>%
   print()
 # Only in sampling 3 for wp treatment there are 2 NA for Saprotoph-Symbiotroph
 
+summary(fungi_funtraits)
 
 # List of fungi functional traits included
 vector_fungi_funtraits <- 

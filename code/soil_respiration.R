@@ -62,15 +62,36 @@ for(i in seq_along(vector_files)){
   
   list_plots[[i]] <- 
    list_result[[i]] %>%
-    ggplot() +
+    select(time, sampling, plot, treatment,  SRL_rate, SRQ_rate) %>% 
+    pivot_longer(
+      cols = c(-time, -sampling, -plot, -treatment), 
+      values_to = "values", 
+      names_to = "variable"
+    ) %>% 
+    ggplot(aes(x = time, y = values, color = variable)) +
     facet_wrap(~plot, scale = "free")+
-    geom_point(aes(x = time, y = SRL_rate), color = "black", alpha = 0.5)+
-    geom_point(aes(x = time, y = SRQ_rate), color = "blue", alpha = 0.5)+
-    labs(title = paste0(sampling_labels[i])) +
-    theme(legend.position = "bottom")
- 
+    geom_point(alpha = 0.5) +
+    scale_color_manual(values = c("SRL_rate" = "orange", "SRQ_rate" = "blue"),
+                       labels = c("SRL_rate" = "SRL Rate","SRQ_rate" = "SRQ Rate")) +
+    
+   # scale_x_continuous( breaks = scales::pretty_breaks(n = 8)) +
+    
+    labs(title = paste0(sampling_labels[i]),
+         color = NULL, x = "Respiration rate", y = "Time") +
+  
+    gg_RR_theme +
+    
+    theme(
+      axis.text.x       = element_text(
+        angle = 45,
+        hjust = 1,
+        face  = "plain",
+        size  = 8
+      ), 
+      legend.position = "bottom")
   
 }
+
 
 
 

@@ -211,7 +211,7 @@ results_prokariota <- list()
 list_levels <- list(lvls1, lvls2, lvls3, lvls4, lvls5, lvls6)
 list_labs   <- list(labs1, labs2, labs3, labs4, labs5, labs6)
     
-list_results_c <- list()
+list_results_c  <- list()
 list_results_wp <- list()
   
 
@@ -235,7 +235,7 @@ list_results_wp <- list()
       )
     
     
-    gg_eff_dynamics_c2<- dyn %>% 
+    gg_eff_dynamics_c2 <- dyn %>% 
       filter(eff_descriptor %in% comparissons) %>% 
       filter(variable %in% list_levels[[i]]) %>%  
       mutate(
