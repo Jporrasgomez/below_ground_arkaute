@@ -134,10 +134,68 @@ soil_respiration_micro <- soil_respiration_point %>%
 soil_respiration_micro %>%  write.csv("data/soil_respiration_micro.csv", row.names = FALSE)
 
 
-source("code/functions/eff_size_LRR_function.R")
-source("code/functions/eff_size_dynamics_LRR_function.R")
+
+
+
+
+
+
+geary_test_treatment <- soil_respiration_point %>%
+  pivot_longer(
+    cols = c(-date, -date_label_noyear, -date_EGM, -sampling, -plot, -treatment, -time, -label_micro),
+    values_to = "value", 
+    names_to = "variable"
+  ) %>% 
+  filter(sampling != "1") %>% 
+  group_by(treatment, variable) %>% 
+  summarize(
+    n = n(),
+    mean_variable = mean(value, na.rm = T), 
+    sd_variable = sd(value, na.rm = T)
+  ) %>% 
+  mutate(geary_test_value = (mean_variable/sd_variable) *((4 * n^1.5) / (1 + 4 * n))) %>% 
+  mutate(geary_test_outcome = ifelse(geary_test_value >= 3, paste0("TRUE"), paste0("FALSE")))
+
+
+geary_test_sampling <- soil_respiration_point %>%
+  pivot_longer(
+    cols = c(-date, -date_label_noyear, -date_EGM, -sampling, -plot, -treatment, -time, -label_micro),
+    values_to = "value", 
+    names_to = "variable"
+  ) %>% 
+  group_by(treatment, sampling, variable) %>% 
+  summarize(
+    n = n(),
+    mean_variable = mean(value, na.rm = T), 
+    sd_variable = sd(value, na.rm = T)
+  ) %>% 
+  mutate(geary_test_value = (mean_variable/sd_variable) *((4 * n^1.5) / (1 + 4 * n))) %>% 
+  mutate(geary_test_outcome = ifelse(geary_test_value >= 3, paste0("TRUE"), paste0("FALSE")))
+
+false_sampling <- geary_test_sampling %>% 
+  filter(geary_test_outcome == "FALSE")
+unique(false_sampling$variable)
+
+nrow(false_sampling)/nrow(geary_test_sampling) *100
+
+false_cases_sampling <- false_sampling %>%
+  ungroup() %>% 
+  select(variable, treatment, sampling, geary_test_value, geary_test_outcome) %>% 
+  group_by(variable, treatment) %>% 
+  summarize(
+    n = n(),
+    samplings = list(as.numeric(sampling)),
+    .groups = "drop"
+  )
+
+
+
+source("code/functions/new_aggregated.R")
+source("code/functions/new_dynamics.R")
 source("code/functions/gg_aggregated_function_2.R")
 source("code/functions/gg_dynamics_function2.R")
+
+
 
 
 

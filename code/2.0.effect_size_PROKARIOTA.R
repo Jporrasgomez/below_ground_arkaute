@@ -12,6 +12,18 @@ palette <- palette_CB
 
 prokariota_data <- read.csv("data/data_prokariota.csv") %>%  select(-X)
 
+prokariota_data %>% 
+  pivot_longer(
+    cols = c(-marker, -date, -date_label_noyear, -year, -sampling, -plot, -treatment), 
+    names_to = "variable", 
+    values_to = "values"
+  ) %>% 
+  ggplot(aes(y = values, x = "")) + 
+  facet_wrap(~ variable, scale = "free") + 
+  geom_boxplot()
+
+# There are outliers. However, each dot represent a replicate. For dynamic analysis
+# we cannot lose points because we only have 4. 
 
 
 
@@ -58,7 +70,7 @@ unique(false_sampling$variable)
 
 nrow(false_sampling)/nrow(geary_test_sampling) *100
 
-testing_false_cases <- false_sampling %>%
+false_cases_sampling <- false_sampling %>%
   ungroup() %>% 
   select(variable, treatment, sampling, geary_test_value, geary_test_outcome) %>% 
   group_by(variable, treatment) %>% 
@@ -74,18 +86,6 @@ testing_false_cases <- false_sampling %>%
 
 ############ EFFECT SIZE #############
 
-prokariota_data %>% 
-  pivot_longer(
-    cols = c(-marker, -date, -date_label_noyear, -year, -sampling, -plot, -treatment), 
-    names_to = "variable", 
-    values_to = "values"
-  ) %>% 
-  ggplot(aes(y = values, x = "")) + 
-  facet_wrap(~ variable, scale = "free") + 
-  geom_boxplot()
-
-# There are outliers. However, each dot represent a replicate. For dynamic analysis
-# we cannot lose points because we only have 4. 
 
 
 {
@@ -140,8 +140,8 @@ labels_main_variables <- c(
 
 
 
-source("code/functions/eff_size_LRR_function.R")
-source("code/functions/eff_size_dynamics_LRR_function.R")
+source("code/functions/new_aggregated.R")
+source("code/functions/new_dynamics.R")
 source("code/functions/gg_aggregated_function_2.R")
 source("code/functions/gg_dynamics_function2.R")
 
@@ -163,7 +163,7 @@ for(i in seq_along(variables_prokariota)){
       #  lower_limit = round(lower_limit, 2),
       #  upper_limit = round(upper_limit, 2)
       #) %>% 
-      select(eff_descriptor, variable, eff_value, lower_limit, upper_limit, null_effect)
+      select(eff_descriptor, variable, eff_value, lower_limit, upper_limit, null_effect, analysis)
     
   
     

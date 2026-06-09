@@ -112,8 +112,8 @@ labels_fungi_variables <- c(
   "Unassigned"                        = "Unassigned"
 )
 
-source("code/functions/eff_size_LRR_function.R")
-source("code/functions/eff_size_dynamics_LRR_function.R")
+source("code/functions/new_aggregated.R")
+source("code/functions/new_dynamics.R")
 source("code/functions/gg_aggregated_function_2.R")
 source("code/functions/gg_dynamics_function2.R")
 
