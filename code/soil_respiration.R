@@ -49,6 +49,7 @@ list_plots <- list()
 
 for(i in seq_along(vector_files)){
   
+  i = 1
   lines <- read_lines(vector_files[i]) 
   
   clean_lines <- lines[!stringr::str_detect(lines, "Zero|Start|End")]
@@ -76,7 +77,7 @@ for(i in seq_along(vector_files)){
     
    # scale_x_continuous( breaks = scales::pretty_breaks(n = 8)) +
     
-    labs(title = paste0(sampling_labels[i]),
+    labs(title = paste0(sampling_labels[i], "-" ),
          color = NULL, x = "Respiration rate", y = "Time") +
   
     gg_RR_theme +
@@ -126,6 +127,12 @@ soil_respiration_point <- soil_respiration_raw %>%
     SRQ_rate = SRQ_rate
   )
 
+soil_respiration_point %>%  filter(sampling == "16") %>%  View()
+
+soil_respiration_point %>% 
+  group_by(sampling, label_micro) %>% 
+  summarize(n = n()) %>% 
+  View()
   
 
 soil_respiration_point %>% 
@@ -218,18 +225,21 @@ source("code/functions/gg_dynamics_function2.R")
 
 
 
+variables <- c("SRL_rate", "SRQ_rate")
+list_agg  <- list()
+list_dyn  <- list()
 
 
-{
+for(i in seq_along(variables)){
 
 SR_no0 <- soil_respiration_point %>% filter(sampling != "0")
 SR_dyn <- soil_respiration_point
 
 
 
-LRR_agg(SR_no0, "SRL_rate")
+LRR_agg(SR_no0, variables[i])
 
-agg <- effsize_data %>% 
+list_agg[[i]] <- effsize_data %>% 
   mutate(
     eff_value = round(eff_value, 2),
     lower_limit = round(lower_limit, 2),
@@ -239,9 +249,9 @@ agg <- effsize_data %>%
 
 
 
-LRR_dynamics(SR_dyn, "SRL_rate")
+LRR_dynamics(SR_dyn, variables[i])
 
-dyn <- effsize_dynamics_data %>% 
+list_dyn[[i]] <- effsize_dynamics_data %>% 
   mutate(
     date_label_noyear = factor(
       date_label_noyear,
@@ -249,120 +259,126 @@ dyn <- effsize_dynamics_data %>%
       ordered = TRUE
     )
   )
+}
+
+agg <- do.call(rbind, list_agg)
+dyn <- do.call(rbind, list_dyn)
 
 
-
+{
 comparissons <- c("p_vs_c", "w_vs_c", "wp_vs_c")
 
-lvls <-"SRL_rate"
-labs <- c("SRL_rate" = "Soil respiration rate")
-
-
-gg_eff_agg_c2 <- agg %>% 
-  filter(eff_descriptor %in% comparissons,
-         variable == "SRL_rate") %>% 
-  mutate(
-    eff_descriptor = factor(eff_descriptor, levels = comparissons),
-    variable       = factor(variable, levels = lvls,
-                            labels = labs)
-  ) %>% 
-  ggagg2(
-    palette   = palette_RR_CB,
-    labels    = labels_RR2,
-    colorline = "grey50",
-    limitvar  = lvls,
-    labelvar  = labs, 
-    breaks_axix_y = 4
-  )
-
-
-gg_eff_dynamics_c2<- dyn %>% 
-  filter(eff_descriptor %in% comparissons) %>% 
-  filter(variable == "SRL_rate") %>%  
-  mutate(
-    variable       = factor(variable, levels = lvls,
-                            labels = labs)
-    ) %>% 
-  ggdyn2(palette_RR_CB,
-         labels_RR2, 
-         "grey50",
-         position = position_dodge(width = 0.5),
-         asterisk = 8, 
-         caps = position_dodge(width = 0.5)$width)
-
-
-gg_control <-
-  (gg_eff_agg_c2 + 
-     gg_eff_dynamics_c2 + theme (legend.position = "none") + 
-     plot_layout(guides = "collect",
-                 widths = c(1, 10))) +
-  plot_annotation(theme = theme(legend.position = "bottom"))
+lvls <-c("SRL_rate", "SRQ_rate")
+labs <- c("SRL_rate" = "Soil respiration rate(g/(m2·h) - Linear fit ",
+          "SRQ_rate" = "Soil respiration rate(g/(m2·h) - Quadratic fit")
 
 
 
-########### COMBINED / PERTURBATION    ###
-
-# <- position_dodge2(width = 0.1, preserve = "single")
-#pos_dod_wp_dyn <- position_dodge2(width = 4, preserve = "single")
-
-
-
-gg_eff_agg_wp2 <- agg %>% 
-  filter(eff_descriptor == "wp_vs_p",
-         variable == "SRL_rate") %>% 
-  mutate(
-    variable       = factor(variable, levels = lvls,
-                            labels = labs)
-  ) %>% 
-  ggagg2(
-    palette   = palette_RR_wp,
-    labels    = labels_RR_wp,
-    colorline = p_CB,
-    limitvar  = lvls,
-    labelvar  = labs, 
-    breaks_axix_y = 2
-  )
-
-
-
-
-gg_eff_dynamics_wp2<- dyn %>% 
-  filter(eff_descriptor %in% c("wp_vs_p")) %>% 
-  filter(variable == "SRL_rate") %>%  
-  mutate(
-    variable = factor(variable, levels = lvls,
-                                       labels = labs)
-    ) %>% 
   
-  ggdyn2(palette_RR_wp,
-         labels_RR_wp2, 
-         p_CB,
-         position = position_dodge(width = 0.5),
-         asterisk = 8, 
-         caps = position_dodge(width = 0.5)$width)
-
-
-gg_wp <-
-  (gg_eff_agg_wp2 + 
-     gg_eff_dynamics_wp2 + theme (legend.position = "none") + 
-     plot_layout(guides = "collect",
-                 widths = c(1, 10))) +
-  plot_annotation(theme = theme(legend.position = "bottom"))
+  gg_eff_agg_c2 <- agg %>% 
+    filter(eff_descriptor %in% comparissons,
+           variable %in% variables) %>% 
+    mutate(
+      eff_descriptor = factor(eff_descriptor, levels = comparissons),
+      variable       = factor(variable, levels = variables,
+                              labels = labs)
+    ) %>% 
+    ggagg2(
+      palette   = palette_RR_CB,
+      labels    = labels_RR2,
+      colorline = "grey50",
+      limitvar  = lvls,
+      labelvar  = labs, 
+      breaks_axix_y = 3
+    )
+  
+  
+  gg_eff_dynamics_c2<- dyn %>% 
+    filter(eff_descriptor %in% comparissons) %>% 
+    #filter(variable %in% variables) %>%  
+    mutate(
+      variable = factor(variable, 
+                        levels = variables, 
+                        labels = labs)) %>% 
+    ggdyn2(palette_RR_CB,
+           labels_RR2, 
+           "grey50",
+           position = position_dodge(width = 0.5),
+           asterisk = 8, 
+           caps = position_dodge(width = 0.5)$width)
+  
+  
+  gg_control <-
+    (gg_eff_agg_c2 + 
+       gg_eff_dynamics_c2 + theme (legend.position = "none") + 
+       plot_layout(guides = "collect",
+                   widths = c(1, 10))) +
+    plot_annotation(theme = theme(legend.position = "bottom"))
+  
+  
+  
+  
+  
+  ########### COMBINED / PERTURBATION    ###
+  
+  pos_dod_wp_agg <- position_dodge2(width = 0.1, preserve = "single")
+  pos_dod_wp_dyn <- position_dodge2(width = 4, preserve = "single")
+  
+  
+  
+  gg_eff_agg_wp2 <- agg %>% 
+    filter(eff_descriptor == "wp_vs_p",
+           variable %in% variables) %>% 
+    mutate(
+      variable = factor(variable, levels = variables,
+                        labels = labs)
+    ) %>% 
+    ggagg2(
+      palette   = palette_RR_wp,
+      labels    = labels_RR_wp,
+      colorline = p_CB,
+      limitvar  = lvls,
+      labelvar  = labs, 
+      breaks_axix_y = 2
+    )
+  
+  
+  
+  
+  gg_eff_dynamics_wp2<- dyn %>% 
+    filter(eff_descriptor %in% c("wp_vs_p")) %>% 
+    filter(variable %in% variables) %>%  
+    mutate(
+      variable = factor(variable, 
+                        levels = variables, 
+                        labels = labs)) %>% 
+    
+    ggdyn2(palette_RR_wp,
+           labels_RR_wp2, 
+           p_CB,
+           position = position_dodge(width = 0.5),
+           asterisk = 8, 
+           caps = position_dodge(width = 0.5)$width)
+  
+  
+  gg_wp <-
+    (gg_eff_agg_wp2 + 
+       gg_eff_dynamics_wp2 + theme (legend.position = "none") + 
+       plot_layout(guides = "collect",
+                   widths = c(1, 10))) +
+    plot_annotation(theme = theme(legend.position = "bottom"))
+  
 
 
 }
-
-
 
 gg_control
 gg_wp
 
 
+
 ggsave("results/plots/soil_respiration_c.png", plot = gg_control, dpi = 300)
 ggsave("results/plots/soil_respiration_wp.png", plot = gg_wp, dpi = 300)
-
-
-
 
 
 

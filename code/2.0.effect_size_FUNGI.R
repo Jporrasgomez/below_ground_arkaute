@@ -85,7 +85,7 @@ testing_false_cases <- false_sampling %>%
   
   variables_fungi <- 
   (fungi_data %>% 
-     select(-plot , -marker, -treatment, -date, -date_label_noyear, -year, -sampling, -goods_coverage) %>% 
+     select(-plot , -marker, -treatment, -date, -date_label_noyear, -year, -sampling, -goods_coverage, -nASV) %>% 
      colnames())
 fungi_no0 <- fungi_data %>% 
   filter( sampling != "0") 
@@ -94,8 +94,8 @@ fungi <- fungi_data
 
 limits_main_variables <- variables_fungi
 labels_fungi_variables <- c(
-  "nASV"                              = "Number ASV",
-  "observed_features"                 = "Number ASV novogene",
+  #"nASV"                              = "Number ASV",
+  "observed_features"                 = "Number ASV",
   "chao1"                             = "Estimated richness (chao1)",
   "dominance"                         = "Dominance",
   "pielou_e"                          = "Evenness",
@@ -168,7 +168,7 @@ lvls2 <- limits_main_variables[7:12]
 labs2 <- unname(labels_fungi_variables[7:12])
 
 lvls3 <- limits_main_variables[13:16]
-labs3 <- unname(labels_fungi_variables[13:16])
+labs3 <- unname(labels_fungi_variables[13:15])
 
 
 

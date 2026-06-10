@@ -133,8 +133,13 @@ data_august_daylight <- data %>%
     data = "August - daylight"
   )
 
+temperatures <- c("t_top", "t_bottom", "t_ground")
+j = 1
+temp = temperatures[j]
 
-{data_list <- list()
+
+{
+  data_list <- list()
 data_list[["data"]] <- data
 data_list[["data_daylight"]] <- data_daylight
 data_list[["data_growth"]] <- data_growth
@@ -160,8 +165,7 @@ counter = 0
 
 for ( i in 1:8) {
   
-
-  anova_result <- aov(t_bottom ~ OTC_label, data = data_list[[i]])
+  anova_result <- aov(t_top ~ OTC_label, data = data_list[[i]])  ## cambiar temperatura cuando sea necesario
   summary(anova_result)
   a <- TukeyHSD(anova_result)
   
@@ -172,18 +176,20 @@ for ( i in 1:8) {
   df_mean_difference$mean_diff[counter] <- round(a$OTC_label[1], 2)
   df_mean_difference$IC_95[counter] <- paste0(round(a$OTC_label[2], 2), "-", round(a$OTC_label[3],2))
   
-  df_mean_difference$mean_value_OTC[counter] <- mean(data_list[[i]]$t_top[which(data_list[[i]]$OTC_label == "otc")])
-  df_mean_difference$sd_value_OTC[counter] <- sd(data_list[[i]]$t_top[which(data_list[[i]]$OTC_label == "otc")])
+  df_mean_difference$mean_value_OTC[counter] <- mean(data_list[[i]][[temp]][which(data_list[[i]]$OTC_label == "otc")])
+  df_mean_difference$sd_value_OTC[counter] <- sd(data_list[[i]][[temp]][which(data_list[[i]]$OTC_label == "otc")])
   
-  df_mean_difference$mean_value_control[counter] <-mean(data_list[[i]]$t_top[which(data_list[[i]]$OTC_label == "control")])
-  df_mean_difference$sd_value_control[counter] <-sd(data_list[[i]]$t_top[which(data_list[[i]]$OTC_label == "control")])
+  df_mean_difference$mean_value_control[counter] <-mean(data_list[[i]][[temp]][which(data_list[[i]]$OTC_label == "control")])
+  df_mean_difference$sd_value_control[counter] <-sd(data_list[[i]][[temp]][which(data_list[[i]]$OTC_label == "control")])
   
   
 }
 }
 
+View(df_mean_difference)
+
 # Seeing anova test for all year, 24h : 
-anova_result_temp <- aov(t_bottom ~ OTC_label, data = data_list[[1]])
+anova_result_temp <- aov(t_ground ~ OTC_label, data = data_list[[8]])
 summary(anova_result_temp)
 TukeyHSD(anova_result_temp)
 
@@ -477,11 +483,14 @@ gg_year_diff <-
 
   print(gg_boxplot_alldata)
 
+
   
   print(gg_boxplot_daily_average)
   
   
   print(gg_24h_diff) # Supplementary Fig. 4
+  
+  ggsave("results/plots/24h_t_ground.png", plot = gg_24h_diff, dpi = 300)
   
   
   gg_year_temp <-
@@ -489,6 +498,8 @@ gg_year_diff <-
     plot_layout(ncol = 1) + 
     plot_annotation(tag_levels = "a")
   print(gg_year_temp) # Supplementary Fig. 5
+  
+  ggsave("results/plots/allyear_t_ground.png", plot = gg_year_temp, dpi = 300)
   
   
   

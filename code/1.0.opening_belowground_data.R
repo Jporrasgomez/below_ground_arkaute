@@ -309,6 +309,30 @@ prokariota_funtraits_checking <- prokariota_funtraits0 %>%
 summary(prokariota_funtraits_checking)
 
 
+gg_NA <- prokariota_funtraits_checking %>% 
+  pivot_longer(
+    cols = c(-sample, -marker, -label_micro, -plot,
+             -treatment, -date, -day, -month, -year, -sampling,
+             -date_label, - date_label_noyear),
+    names_to = "funtrait", 
+    values_to = "value"
+  ) %>% 
+  filter(is.na(value)) %>% 
+  group_by(funtrait) %>% 
+  summarize(
+    n_na = n(),
+    perc_na = (n_na/128) *100
+  ) %>% 
+ ggplot(aes(y = reorder(funtrait, perc_na), x = perc_na)) + 
+  geom_col(fill = "lightblue") +
+  geom_vline(xintercept = (12/128)*100, color = "red2", linetype = "dashed", linewidth = 1) +
+  labs (y = "Functional feature of PROKARYOTES", x = "% NA (Over 128 samples)") +
+  theme_bw()
+
+ggsave("results/plots/NA_prokaryote_functional.png", plot = gg_NA, dpi = 300)
+
+
+
 prokariota_funtraits <- prokariota_funtraits_checking %>% 
   select(where(~sum(is.na(.)) <= 12)) # I delete all funtraits with more than 12 NAs (10% of data)
 
@@ -318,6 +342,22 @@ cat(
 have been removed beacuse they cointained more than 12 NA's (~10% of the data)")
 
 # Checking if the NAs present are concentrated in some sampling x treatment 
+
+prokariota_funtraits %>% 
+  pivot_longer(
+    cols = c(-sample, -marker, -label_micro, -plot,
+             -treatment, -date, -day, -month, -year, -sampling,
+             -date_label, - date_label_noyear),
+    names_to = "funtrait", 
+    values_to = "value"
+  ) %>% 
+  filter(is.na(value)) %>% 
+  group_by(funtrait) %>% 
+  summarize(
+    n_na = n()
+  ) %>% 
+  View()
+
 prokariota_funtraits %>% 
   pivot_longer(
     cols = c(-sample, -marker, -label_micro, -plot,
@@ -352,6 +392,9 @@ print(vector_prokariota_funtraits)
 
 
 
+
+
+
 fungi_funtraits_checking <- fungi_funtraits0 %>% 
   select(-description) %>% 
   pivot_wider(
@@ -371,6 +414,23 @@ cat(
   have been removed beacuse they cointained more than 12 NA's (~10% of the data)")
 
 # Checking if the NAs present are concentrated in some sampling x treatment 
+
+
+fungi_funtraits %>% 
+  pivot_longer(
+    cols = c(-sample, -marker, -label_micro, -plot,
+             -treatment, -date, -day, -month, -year, -sampling, -date_label, - date_label_noyear),
+    names_to = "funtrait", 
+    values_to = "value"
+  ) %>% 
+  filter(is.na(value)) %>% 
+  group_by(funtrait) %>% 
+  summarize(
+    n_na = n()
+  ) %>% 
+  View()
+
+
 fungi_funtraits %>% 
   pivot_longer(
     cols = c(-sample, -marker, -label_micro, -plot,

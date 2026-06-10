@@ -91,7 +91,7 @@ false_cases_sampling <- false_sampling %>%
 {
   variables_prokariota <- 
   (prokariota_data %>% 
-         select(-plot , -marker, -treatment, -date, -date_label_noyear, -year, -sampling, -goods_coverage) %>% 
+         select(-plot , -marker, -treatment, -date, -date_label_noyear, -year, -sampling, -goods_coverage, -nASV) %>% 
          colnames())
 prokariota_no0 <- prokariota_data %>% 
   filter( sampling != "0") 
@@ -100,8 +100,8 @@ prokariota <- prokariota_data
 
 limits_main_variables <- variables_prokariota
 labels_main_variables <- c(
-  "nASV"                                          = "Number ASV", 
-  "observed_features"                             = "Number ASV novogene", 
+  #"nASV"                                          = "Number ASV", 
+  "observed_features"                             = "Number ASV", 
   "chao1"                                         = "Estimated richness (chao1)",
   "dominance"                                     = "Dominance", 
   "pielou_e"                                      = "Evenness", 
@@ -148,11 +148,15 @@ source("code/functions/gg_dynamics_function2.R")
 
 
 list_prokariota <- list(prokariota_no0, prokariota)
-comparissons <- c("p_vs_c", "w_vs_c", "wp_vs_c")
+comparissons <- c("p_vs_c",
+                  "w_vs_c"
+                  #"wp_vs_c"
+                  )
 
 list_agg <- list()
 list_dyn <- list()
 for(i in seq_along(variables_prokariota)){ 
+  
     
 
     LRR_agg(list_prokariota[[1]], variables_prokariota[i])
@@ -205,7 +209,7 @@ results_prokariota <- list()
     labs5 <- unname(labels_main_variables[25:30])
     
     lvls6 <- limits_main_variables[31:35]
-    labs6 <- unname(labels_main_variables[31:35])
+    labs6 <- unname(labels_main_variables[31:34])
     
     
 list_levels <- list(lvls1, lvls2, lvls3, lvls4, lvls5, lvls6)
@@ -216,6 +220,8 @@ list_results_wp <- list()
   
 
   for (i in seq_along(1:6)){
+    
+
     
     gg_eff_agg_c2 <- agg %>% 
       filter(eff_descriptor %in% comparissons,
