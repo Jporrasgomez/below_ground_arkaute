@@ -49,7 +49,6 @@ list_plots <- list()
 
 for(i in seq_along(vector_files)){
   
-  i = 1
   lines <- read_lines(vector_files[i]) 
   
   clean_lines <- lines[!stringr::str_detect(lines, "Zero|Start|End")]
